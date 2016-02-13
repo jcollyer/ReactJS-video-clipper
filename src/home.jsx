@@ -27,7 +27,6 @@ var Home = React.createClass({
         <h3>Clips</h3>
         <ClipForm onChange={this.addClip} buttonName="Add Clip"/>
         <ClipList clips={this.state.clips} />
-        <VideoPlayer />
       </div>
     );
   }
@@ -72,7 +71,7 @@ var ClipForm = React.createClass({
 var ClipList = React.createClass({
   mixins: [ReactFireMixin],
   getInitialState: function() {
-    return{clipKey: "", showEditForm: false};
+    return{clipKey: "", showEditForm: false, clip_name: "", in: 4, out: 20};
   },
   handleDelete: function(name) {
     var key = this.getKey(name);
@@ -87,6 +86,9 @@ var ClipList = React.createClass({
     var clip = new Firebase('https://video-clips.firebaseio.com/clips/'+this.state.clipKey+'');
     clip.set({name: newClip.name, start_time: newClip.start_time, end_time: newClip.end_time});
     this.setState({name: "", start_time: "", end_time: ""});
+  },
+  showClip: function(clip) {
+    this.setState({clip_name: clip.name, in: clip.start_time, out: clip.end_time})
   },
   getKey: function(name) {
     var key = "";
@@ -107,12 +109,10 @@ var ClipList = React.createClass({
     var editClipForm;
     if(this.state.showEditForm) {
       editClipForm = <ClipForm onChange={this.editClip} buttonName="Update Clip" clipKey={this.state.clipKey} />;
-    } else {
-      editClipForm = "";
     }
 
     var createClip = function(clip, index) {
-      return <li key={index + clip}>
+      return <li key={index + clip} onClick={that.showClip.bind(null, clip)}>
                <div>name: {clip.name}</div>
                <div>start: {clip.start_time}</div>
                <div>end: {clip.end_time}</div>
@@ -125,10 +125,28 @@ var ClipList = React.createClass({
       <div>
         {editClipForm}
         <ul>{this.props.clips.map(createClip)}</ul>
+        <VideoPlayer in={this.state.in} out={this.state.out} />
       </div>
     );
   }
 });
 
+var VideoPlayer = React.createClass({
+  componentWillReceiveProps: function(nextProps) {
+    // Tear down existing video
+    var videoContainer = document.getElementById("video-container");
+    videoContainer.innerHTML = "";
+    var video = "";
+
+    // Set up new video player
+    video = document.createElement("video");
+    video.setAttribute("controls","");
+    video.setAttribute("src","http://grochtdreis.de/fuer-jsfiddle/video/sintel_trailer-480.mp4#t="+nextProps.in+","+nextProps.out+"");
+    videoContainer.appendChild(video);
+  },
+  render: function() {
+    return <div id="video-container"></div>;
+  }
+});
 
 React.render(<Home />, document.getElementById('home'));
