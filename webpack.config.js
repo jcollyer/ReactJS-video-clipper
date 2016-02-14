@@ -1,7 +1,4 @@
-var Webpack = require('webpack');
-
 module.exports = {
-  devtool: 'eval',
   entry: ['./src/main.jsx'],
   output: {
     path: '/build',
@@ -12,8 +9,11 @@ module.exports = {
       {
         test: /\.jsx$/,
         loaders: [
-        'react-hot', 'jsx-loader'
+          'jsx-loader'
         ]
+      }, {
+        test: /\.css$/,
+        loader: 'style-loader!css-loader'
       }
     ]
   }

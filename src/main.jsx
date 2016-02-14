@@ -2,6 +2,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 require('../node_modules/firebase/lib/firebase-web.js');
 var ReactFireMixin = require('../node_modules/reactfire/dist/reactfire.js');
+require('./style.css');
 
 var Home = React.createClass({
   mixins: [ReactFireMixin],
@@ -18,7 +19,6 @@ var Home = React.createClass({
   componentWillMount: function() {
     var ref = new Firebase("https://video-clips.firebaseio.com/clips/");
     this.bindAsArray(ref, "clips");
-    debugger;
   },
   componentWillUnmount: function() {
     debugger;
@@ -60,9 +60,9 @@ var ClipForm = React.createClass({
   render: function() {
     return (
       <form onSubmit={this.handleSubmit}>
-        Name: <input onChange={this.onChange} value={this.state.name} />
-        Start Time: <input onChange={this.onChange} value={this.state.start_time} />
-        End Time: <input onChange={this.onChange} value={this.state.end_time} />
+        Name: <input onChange={this.onChange} id="name" value={this.state.name} />
+        Start Time: <input onChange={this.onChange} id="start-time" value={this.state.start_time} />
+        End Time: <input onChange={this.onChange} id="end-time" value={this.state.end_time} />
         <button>{this.props.buttonName}</button>
       </form>
     );
@@ -125,6 +125,7 @@ var ClipList = React.createClass({
 
     return (
       <div>
+        <h3>Clip list</h3>
         {editClipForm}
         <ul>{this.props.clips.map(createClip)}</ul>
         <VideoPlayer in={this.state.in} out={this.state.out} />

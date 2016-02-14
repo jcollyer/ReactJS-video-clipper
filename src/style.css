@@ -1,0 +1,27 @@
+body {
+  background: #ddd;
+}
+ul {
+  border: 1px solid #999;
+  float: left;
+  padding: 0px;
+  margin: 10px;
+  width: 300px;
+}
+li {
+  height: 30px;
+  list-style-type: none;
+}
+li:nth-child(even){
+  background: #999;
+}
+li span {
+  float: left;
+  padding: 5px;
+}
+#video-container {
+  float: left;
+}
+video {
+  max-width: 400px;
+}
