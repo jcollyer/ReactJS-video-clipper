@@ -7,7 +7,7 @@ require('./style.css');
 var Home = React.createClass({
   mixins: [ReactFireMixin],
   getInitialState: function() {
-    return {clip: [], clips: [], name: "", start_time: "", end_time: ""};
+    return {clip: [], clips: [], name: "", start_time: "", end_time: "", database: "https://video-clips.firebaseio.com/clips/"};
   },
   addClip: function(clip) {
     this.firebaseRefs.clips.push({
@@ -17,20 +17,18 @@ var Home = React.createClass({
     });
   },
   componentWillMount: function() {
-    var ref = new Firebase("https://video-clips.firebaseio.com/clips/");
+    var ref = new Firebase(this.state.database);
     this.bindAsArray(ref, "clips");
   },
   componentWillUnmount: function() {
-    debugger;
-      this.unbind("clips");
-      this.firebaseRef.off();
+    this.firebaseRef.off();
   },
   render: function() {
     return (
       <div>
         <h3>Clips</h3>
         <ClipForm onChange={this.addClip} buttonName="Add Clip"/>
-        <ClipList clips={this.state.clips} />
+        <ClipList clips={this.state.clips} database={this.state.database} originalVideo="http://grochtdreis.de/fuer-jsfiddle/video/sintel_trailer-480.mp4" />
       </div>
     );
   }
@@ -38,7 +36,7 @@ var Home = React.createClass({
 
 var ClipForm = React.createClass({
   getInitialState: function() {
-    return{name: "",start_time:"",end_time:""};
+    return{name: "", start_time:"", end_time:""};
   },
   handleSubmit: function(e) {
     e.preventDefault();
@@ -61,8 +59,8 @@ var ClipForm = React.createClass({
     return (
       <form onSubmit={this.handleSubmit}>
         Name: <input onChange={this.onChange} id="name" value={this.state.name} />
-        Start Time: <input onChange={this.onChange} id="start-time" value={this.state.start_time} />
-        End Time: <input onChange={this.onChange} id="end-time" value={this.state.end_time} />
+        Start Time: <input type="number" onChange={this.onChange} id="start-time" value={this.state.start_time}/>
+        End Time: <input type="number" onChange={this.onChange} id="end-time" value={this.state.end_time} />
         <button>{this.props.buttonName}</button>
       </form>
     );
@@ -72,24 +70,24 @@ var ClipForm = React.createClass({
 var ClipList = React.createClass({
   mixins: [ReactFireMixin],
   getInitialState: function() {
-    return{clipKey: "", showEditForm: false, clip_name: "", in: 4, out: 20};
+    return{clip: {}, in: null, out: null, showEditForm: false};
   },
   handleDelete: function(name) {
     var key = this.getKey(name);
-    var ref = new Firebase('https://video-clips.firebaseio.com/clips/'+key+'');
+    var ref = new Firebase(this.props.database + key);
     ref.remove();
   },
-  handleEdit: function(name) {
-    var key = this.getKey(name);
-    this.setState({clipKey: key, showEditForm: true});
+  handleEdit: function(clip) {
+    this.setState({clip: clip, showEditForm: true});
   },
   editClip: function(newClip) {
-    var clip = new Firebase('https://video-clips.firebaseio.com/clips/'+this.state.clipKey+'');
-    clip.set({name: newClip.name, start_time: newClip.start_time, end_time: newClip.end_time});
+    var key = this.getKey(this.state.clip.name);
+    var clip = new Firebase(this.props.database + key);
+    clip.set({name: newClip.name || this.state.clip.name, start_time: newClip.start_time || this.state.clip.start_time, end_time: newClip.end_time || this.state.clip.end_time});
     this.setState({name: "", start_time: "", end_time: ""});
   },
   showClip: function(clip) {
-    this.setState({clip_name: clip.name, in: clip.start_time, out: clip.end_time})
+    this.setState({clipName: clip.name, in: clip.start_time, out: clip.end_time})
   },
   getKey: function(name) {
     var key = "";
@@ -99,27 +97,29 @@ var ClipList = React.createClass({
     return key;
   },
   componentWillMount: function() {
-    var ref = new Firebase("https://video-clips.firebaseio.com/clips/");
+    var ref = new Firebase(this.props.database);
     this.bindAsArray(ref, "clips");
   },
   componentWillUnmount: function() {
-    // this.firebaseRef.off();
-    // this.unbind("clips");
+    this.firebaseRef.off();
   },
   render: function() {
     var that = this;
     var editClipForm;
+    var fullVideo = {name: this.props.originalVideo};
+
     if(this.state.showEditForm) {
-      editClipForm = <ClipForm onChange={this.editClip} buttonName="Update Clip" clipKey={this.state.clipKey} />;
+      editClipForm = <ClipForm onChange={this.editClip} buttonName="Update Clip" />;
     }
 
     var createClip = function(clip, index) {
-      return <li key={index + clip} onClick={that.showClip.bind(null, clip)}>
+      return <li key={index + clip}>
                <div>name: {clip.name}</div>
                <div>start: {clip.start_time}</div>
                <div>end: {clip.end_time}</div>
-               <button onClick={that.handleEdit.bind(null, clip.name)}>Edit</button>
-               <button onClick={that.handleDelete.bind(null, clip.name)}>Delete</button>
+               <button onClick={that.showClip.bind(null, clip)} className="fa fa-play"></button>
+               <button onClick={that.handleEdit.bind(null, clip)} className="fa fa-pencil"></button>
+               <button onClick={that.handleDelete.bind(null, clip.name)} className="fa fa-trash"></button>
             </li>;
     };
 
@@ -127,8 +127,11 @@ var ClipList = React.createClass({
       <div>
         <h3>Clip list</h3>
         {editClipForm}
-        <ul>{this.props.clips.map(createClip)}</ul>
-        <VideoPlayer in={this.state.in} out={this.state.out} />
+        <ul>
+          <li onClick={this.showClip.bind(null, fullVideo)}>Full Video<button className="fa fa-play"></button></li>
+          {this.props.clips.map(createClip)}
+        </ul>
+        <VideoPlayer in={this.state.in} out={this.state.out} video={this.props.originalVideo} />
       </div>
     );
   }
@@ -144,8 +147,10 @@ var VideoPlayer = React.createClass({
     // Set up new video player
     video = document.createElement("video");
     video.setAttribute("controls","");
-    video.setAttribute("src","http://grochtdreis.de/fuer-jsfiddle/video/sintel_trailer-480.mp4#t="+nextProps.in+","+nextProps.out+"");
+    var src = this.props.video + "#t=" + nextProps.in + "," + nextProps.out;
+    video.setAttribute("src", src);
     videoContainer.appendChild(video);
+    video.play();
   },
   render: function() {
     return <div id="video-container"></div>;

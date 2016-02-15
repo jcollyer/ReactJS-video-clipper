@@ -17,11 +17,17 @@ li:nth-child(even){
 }
 li span {
   float: left;
-  padding: 5px;
+  padding: 2px;
 }
 #video-container {
+  background: black;
   float: left;
+  height: 230px;
+  width: 400px;
 }
 video {
   max-width: 400px;
+}
+input[type="number"]{
+  width: 30px;
 }
