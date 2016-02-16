@@ -26,8 +26,7 @@ var Home = React.createClass({
   render: function() {
     return (
       <div>
-        <h3>Clips</h3>
-        <ClipForm onChange={this.addClip} buttonName="Add Clip"/>
+        <ClipForm onChange={this.addClip} action="Add Clip"/>
         <ClipList clips={this.state.clips} database={this.state.database} originalVideo="http://grochtdreis.de/fuer-jsfiddle/video/sintel_trailer-480.mp4" />
       </div>
     );
@@ -57,12 +56,18 @@ var ClipForm = React.createClass({
   },
   render: function() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        Name: <input onChange={this.onChange} id="name" value={this.state.name} />
-        Start Time: <input type="number" onChange={this.onChange} id="start-time" value={this.state.start_time}/>
-        End Time: <input type="number" onChange={this.onChange} id="end-time" value={this.state.end_time} />
-        <button>{this.props.buttonName}</button>
-      </form>
+      <div id="video-form">
+        <h1>{this.props.action}</h1>
+        <form onSubmit={this.handleSubmit}>
+          <label>name</label>
+          <input onChange={this.onChange} id="name" value={this.state.name} />
+          <label>in</label>
+          <input type="number" onChange={this.onChange} id="start-time" value={this.state.start_time} />
+          <label>out</label>
+          <input type="number" onChange={this.onChange} id="end-time" value={this.state.end_time} />
+          <button>{this.props.action}</button>
+        </form>
+      </div>
     );
   }
 });
@@ -84,7 +89,7 @@ var ClipList = React.createClass({
     var key = this.getKey(this.state.clip.name);
     var clip = new Firebase(this.props.database + key);
     clip.set({name: newClip.name || this.state.clip.name, start_time: newClip.start_time || this.state.clip.start_time, end_time: newClip.end_time || this.state.clip.end_time});
-    this.setState({name: "", start_time: "", end_time: ""});
+    this.setState({name: "", start_time: "", end_time: "", showEditForm: false});
   },
   showClip: function(clip) {
     this.setState({clipName: clip.name, in: clip.start_time, out: clip.end_time})
@@ -95,6 +100,9 @@ var ClipList = React.createClass({
       key = snapshot.key();
     });
     return key;
+  },
+  hideEditForm: function() {
+    this.setState({showEditForm: false});
   },
   componentWillMount: function() {
     var ref = new Firebase(this.props.database);
@@ -109,24 +117,27 @@ var ClipList = React.createClass({
     var fullVideo = {name: this.props.originalVideo};
 
     if(this.state.showEditForm) {
-      editClipForm = <ClipForm onChange={this.editClip} buttonName="Update Clip" />;
+      editClipForm = <div>
+        <ClipForm onChange={this.editClip} action="Update Clip" />
+        <div onClick={this.hideEditForm} className="close fa fa-times-circle"></div>
+      </div>;
     }
 
     var createClip = function(clip, index) {
       return <li key={index + clip}>
-               <div>name: {clip.name}</div>
-               <div>start: {clip.start_time}</div>
-               <div>end: {clip.end_time}</div>
-               <button onClick={that.showClip.bind(null, clip)} className="fa fa-play"></button>
-               <button onClick={that.handleEdit.bind(null, clip)} className="fa fa-pencil"></button>
+              <button onClick={that.showClip.bind(null, clip)} className="fa fa-play"></button>
+               <div>{clip.name}</div>
+               <p>in:</p> <div>{clip.start_time}</div>
+               <p>out:</p> <div>{clip.end_time}</div>
                <button onClick={that.handleDelete.bind(null, clip.name)} className="fa fa-trash"></button>
+               <button onClick={that.handleEdit.bind(null, clip)} className="fa fa-pencil"></button>
             </li>;
     };
 
     return (
-      <div>
-        <h3>Clip list</h3>
+      <div id="clip-list">
         {editClipForm}
+        <h3>Clip list</h3>
         <ul>
           <li onClick={this.showClip.bind(null, fullVideo)}>Full Video<button className="fa fa-play"></button></li>
           {this.props.clips.map(createClip)}
@@ -139,6 +150,9 @@ var ClipList = React.createClass({
 
 var VideoPlayer = React.createClass({
   componentWillReceiveProps: function(nextProps) {
+    // return if not new props
+    if (this.props.in === nextProps.in && this.props.out === nextProps.out) return;
+
     // Tear down existing video
     var videoContainer = document.getElementById("video-container");
     videoContainer.innerHTML = "";
@@ -153,7 +167,11 @@ var VideoPlayer = React.createClass({
     video.play();
   },
   render: function() {
-    return <div id="video-container"></div>;
+    return (
+      <div id="video-container">
+        <video controls src={this.props.video} ></video>
+      </div>
+    );
   }
 });
 

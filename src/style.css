@@ -1,33 +1,102 @@
 body {
-  background: #ddd;
+  background: #eee;
+  font-family: 'PT Sans Narrow', sans-serif;
+}
+#home {
+  width: 400px;
+}
+h1 {
+  text-align: center;
+}
+h3 {
+  border: 1px solid #ccc;
+  line-height: 25px;
+  margin: 20px 0px 0px 50px;
+  text-align: center;
+  width: 80px;
+}
+form {
+  margin: 10px auto 0px;
+  position: relative;
+  width: 300px;
+}
+label {
+  position: absolute;
+  top: -20px;
+}
+input {
+  height: 20px;
+}
+form button {
+  border: none;
+  height: 25px;
+}
+input[type="number"]{
+  width: 30px;
 }
 ul {
-  border: 1px solid #999;
-  float: left;
+  border: 1px solid #bbb;
+  margin: -1px auto;
   padding: 0px;
-  margin: 10px;
   width: 300px;
 }
 li {
   height: 30px;
+  line-height: 1.8em;
   list-style-type: none;
+  padding: 8px 4px;
+}
+li div {
+  background: #333;
+  border-radius: 3px;
+  color: white;
+  float: left;
+  margin: 0px 4px 0px 0px;
+  max-width: 65px;
+  overflow: hidden;
+  padding: 3px 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+li p {
+  float: left;
+  margin: 2px 4px 0px 0px;
+}
+li button {
+  background: transparent;
+  border: none;
+  color: #333;
+  font-size: 30px;
+  margin-top: 5px;
+  float: right;
+  cursor: pointer;
+}
+li button:first-child {
+  float: left;
 }
 li:nth-child(even){
-  background: #999;
-}
-li span {
-  float: left;
-  padding: 2px;
+  background: #bbb;
 }
 #video-container {
   background: black;
-  float: left;
-  height: 230px;
-  width: 400px;
+  height: 280px;
+  left: 410px;
+  position: absolute;
+  top: 20px;
+  width: 500px;
 }
 video {
-  max-width: 400px;
+  width: 100%;
 }
-input[type="number"]{
-  width: 30px;
+#clip-list #video-form {
+  background: #eee;
+  position: absolute;
+  top: 0px;
+  left: 58px;
+}
+.close {
+  cursor: pointer;
+  left: 340px;
+  top: 92px;
+  position: absolute;
 }
