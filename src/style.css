@@ -100,3 +100,6 @@ video {
   top: 92px;
   position: absolute;
 }
+.not-editable {
+  display: none;
+}

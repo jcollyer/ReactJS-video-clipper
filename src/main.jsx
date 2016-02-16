@@ -27,7 +27,11 @@ var Home = React.createClass({
     return (
       <div>
         <ClipForm onChange={this.addClip} action="Add Clip"/>
-        <ClipList clips={this.state.clips} database={this.state.database} originalVideo="http://grochtdreis.de/fuer-jsfiddle/video/sintel_trailer-480.mp4" />
+        <ClipList
+          clips={this.state.clips}
+          database={this.state.database}
+          originalVideo="http://grochtdreis.de/fuer-jsfiddle/video/sintel_trailer-480.mp4"
+          editable={true} />
       </div>
     );
   }
@@ -129,8 +133,8 @@ var ClipList = React.createClass({
                <div>{clip.name}</div>
                <p>in:</p> <div>{clip.start_time}</div>
                <p>out:</p> <div>{clip.end_time}</div>
-               <button onClick={that.handleDelete.bind(null, clip.name)} className="fa fa-trash"></button>
-               <button onClick={that.handleEdit.bind(null, clip)} className="fa fa-pencil"></button>
+               <button onClick={that.handleDelete.bind(null, clip.name)} className={that.props.editable ? "fa fa-trash" : "not-editable"}></button>
+               <button onClick={that.handleEdit.bind(null, clip)} className={that.props.editable ? "fa fa-pencil" : "not-editable"}></button>
             </li>;
     };
 
